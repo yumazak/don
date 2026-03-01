@@ -1,7 +1,6 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import os from 'node:os'
-import { parse } from 'yaml'
 import type { RawConfig, ResolvedMapping } from './types.js'
 
 export class ConfigNotFoundError extends Error {
@@ -24,13 +23,13 @@ function expandHome(filePath: string): string {
 }
 
 function loadConfig(configRoot: string): RawConfig {
-  const configPath = path.join(configRoot, 'dotfiles.yml')
+  const configPath = path.join(configRoot, 'dotfiles.json')
   if (!fs.existsSync(configPath)) {
     throw new ConfigNotFoundError(configPath)
   }
 
   const content = fs.readFileSync(configPath, 'utf-8')
-  const config = parse(content) as RawConfig | null
+  const config = JSON.parse(content) as RawConfig | null
   return { mappings: config?.mappings ?? {} }
 }
 

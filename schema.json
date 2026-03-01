@@ -1,0 +1,42 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "mappings": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "source": {
+              "type": "string",
+              "description": "Source file path relative to config root"
+            },
+            "destination": {
+              "type": "string",
+              "description": "Destination path (~ expands to home directory)"
+            },
+            "critical": {
+              "type": "boolean",
+              "default": false,
+              "description": "If true, requires --force to unlink"
+            },
+            "type": {
+              "type": "string",
+              "enum": ["file", "directory"],
+              "default": "file"
+            }
+          },
+          "required": ["source", "destination"],
+          "additionalProperties": false
+        }
+      }
+    }
+  },
+  "required": ["mappings"],
+  "additionalProperties": false
+}

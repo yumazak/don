@@ -8,8 +8,7 @@
     "dev": "bun run src/index.ts"
   },
   "dependencies": {
-    "incur": "latest",
-    "yaml": "^2.7.0"
+    "incur": "latest"
   },
   "devDependencies": {
     "@types/bun": "latest",

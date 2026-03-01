@@ -17,8 +17,8 @@ afterEach(() => {
   fs.rmSync(tmpDir, { recursive: true, force: true })
 })
 
-function writeConfig(yaml: string) {
-  fs.writeFileSync(path.join(tmpDir, 'dotfiles.yml'), yaml, 'utf-8')
+function writeConfig(config: Record<string, unknown>) {
+  fs.writeFileSync(path.join(tmpDir, 'dotfiles.json'), JSON.stringify(config), 'utf-8')
 }
 
 function createSourceFile(relativePath: string, content = 'test') {
@@ -35,15 +35,7 @@ describe('linkAll', () => {
   test('全マッピングのリンクが作成される', () => {
     createSourceFile('files/a.txt')
     createSourceFile('files/b.txt')
-    writeConfig(`
-mappings:
-  group1:
-    - source: files/a.txt
-      destination: ${destDir}/a.txt
-  group2:
-    - source: files/b.txt
-      destination: ${destDir}/b.txt
-`)
+    writeConfig({ mappings: { group1: [{ source: 'files/a.txt', destination: `${destDir}/a.txt` }], group2: [{ source: 'files/b.txt', destination: `${destDir}/b.txt` }] } })
     const result = linkAll(tmpDir)
 
     expect(result.linked).toBe(2)
@@ -55,15 +47,7 @@ mappings:
   test('select で指定グループのみリンクされる', () => {
     createSourceFile('files/a.txt')
     createSourceFile('files/b.txt')
-    writeConfig(`
-mappings:
-  group1:
-    - source: files/a.txt
-      destination: ${destDir}/a.txt
-  group2:
-    - source: files/b.txt
-      destination: ${destDir}/b.txt
-`)
+    writeConfig({ mappings: { group1: [{ source: 'files/a.txt', destination: `${destDir}/a.txt` }], group2: [{ source: 'files/b.txt', destination: `${destDir}/b.txt` }] } })
     const result = linkAll(tmpDir, 'group1')
 
     expect(result.linked).toBe(1)
@@ -72,12 +56,7 @@ mappings:
   })
 
   test('ソースが存在しない場合はスキップ', () => {
-    writeConfig(`
-mappings:
-  g:
-    - source: files/nonexistent.txt
-      destination: ${destDir}/a.txt
-`)
+    writeConfig({ mappings: { g: [{ source: 'files/nonexistent.txt', destination: `${destDir}/a.txt` }] } })
     const result = linkAll(tmpDir)
 
     expect(result.linked).toBe(0)
@@ -86,13 +65,7 @@ mappings:
 
   test('ディレクトリ型のリンクが作成される', () => {
     createSourceDir('mydir')
-    writeConfig(`
-mappings:
-  g:
-    - source: mydir
-      destination: ${destDir}/mydir
-      type: directory
-`)
+    writeConfig({ mappings: { g: [{ source: 'mydir', destination: `${destDir}/mydir`, type: 'directory' }] } })
     const result = linkAll(tmpDir)
 
     expect(result.linked).toBe(1)
@@ -104,14 +77,7 @@ describe('unlinkAll', () => {
   test('全シンボリックリンクが削除される', () => {
     createSourceFile('files/a.txt')
     createSourceFile('files/b.txt')
-    writeConfig(`
-mappings:
-  g:
-    - source: files/a.txt
-      destination: ${destDir}/a.txt
-    - source: files/b.txt
-      destination: ${destDir}/b.txt
-`)
+    writeConfig({ mappings: { g: [{ source: 'files/a.txt', destination: `${destDir}/a.txt` }, { source: 'files/b.txt', destination: `${destDir}/b.txt` }] } })
     linkAll(tmpDir)
     const result = unlinkAll(tmpDir)
 
@@ -122,13 +88,7 @@ mappings:
 
   test('critical ファイルはデフォルトでスキップされる', () => {
     createSourceFile('files/important.txt')
-    writeConfig(`
-mappings:
-  g:
-    - source: files/important.txt
-      destination: ${destDir}/important.txt
-      critical: true
-`)
+    writeConfig({ mappings: { g: [{ source: 'files/important.txt', destination: `${destDir}/important.txt`, critical: true }] } })
     linkAll(tmpDir)
     const result = unlinkAll(tmpDir)
 
@@ -139,13 +99,7 @@ mappings:
 
   test('force で critical ファイルも削除される', () => {
     createSourceFile('files/important.txt')
-    writeConfig(`
-mappings:
-  g:
-    - source: files/important.txt
-      destination: ${destDir}/important.txt
-      critical: true
-`)
+    writeConfig({ mappings: { g: [{ source: 'files/important.txt', destination: `${destDir}/important.txt`, critical: true }] } })
     linkAll(tmpDir)
     const result = unlinkAll(tmpDir, undefined, true)
 
@@ -156,15 +110,7 @@ mappings:
   test('select で指定グループのみ削除される', () => {
     createSourceFile('files/a.txt')
     createSourceFile('files/b.txt')
-    writeConfig(`
-mappings:
-  group1:
-    - source: files/a.txt
-      destination: ${destDir}/a.txt
-  group2:
-    - source: files/b.txt
-      destination: ${destDir}/b.txt
-`)
+    writeConfig({ mappings: { group1: [{ source: 'files/a.txt', destination: `${destDir}/a.txt` }], group2: [{ source: 'files/b.txt', destination: `${destDir}/b.txt` }] } })
     linkAll(tmpDir)
     const result = unlinkAll(tmpDir, 'group1')
 
